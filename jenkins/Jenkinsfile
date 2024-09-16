@@ -148,7 +148,7 @@ pipeline {
                         thanosefsta/sqlmap:latest \
                         -m /var/jenkins_home/workspace/${JOB_NAME}${params.endpointsPath} --batch
                         """ 
-                    }   
+                    }    
                     // > sqlmap
                      
                 }
