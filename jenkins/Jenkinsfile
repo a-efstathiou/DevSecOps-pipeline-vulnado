@@ -82,7 +82,7 @@ pipeline {
                         if (dockerComposePath?.trim()) {
                             // If dockerComposePath is provided, run docker-compose to build images
                             echo "Docker Compose file detected. Building images using docker-compose..."
-                            sh """
+                            sh """ 
                                 docker-compose -f ${workspace}${params.dockerComposePath} build --parallel
                             """
                             //docker-compose -f ${workspace}${params.dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
