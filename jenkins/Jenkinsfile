@@ -88,7 +88,7 @@ pipeline {
                             //docker-compose -f ${workspace}${params.dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
                             // Get repository and tag of the images created by docker-compose
                             images = sh(script: """    
-                                docker-compose -f ${workspace}${params.dockerComposePath} images | awk 'NR>1 {print $2 ":" $3}'
+                                docker-compose -f ${workspace}${params.dockerComposePath} images | awk 'NR>1 {print \$2 ":" \$3}'
                             """, returnStdout: true).trim().split("\n")                       
  
                         } else if (dockerfilePath?.trim()) {
