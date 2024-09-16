@@ -94,7 +94,7 @@ pipeline {
                         } else if (dockerfilePath?.trim()) {
                             // If dockerComposePath is NOT provided, build the Docker image using the Dockerfile
                             echo "Dockerfile detected. Building image using docker build..."
-                            
+                             
                             def imageName = "my_image:latest" // You can customize the image name as needed
                             sh """
                                 docker build -t ${imageName} -f ${params.dockerfilePath} .
