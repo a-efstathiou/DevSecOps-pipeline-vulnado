@@ -73,7 +73,7 @@ pipeline {
                 
             }
         }              
-        stage('Check and build Docker Images') {
+        stage('Snyk Docker Image Scan') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
                     script {
@@ -110,10 +110,6 @@ pipeline {
                         images_string = images.join(",")
                     }
                 }
-            }
-        }
-        stage('Snyk Docker Image vulnerability scan') {
-            steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
                         def images = []
@@ -142,10 +138,14 @@ pipeline {
         }             
         stage('SQL map endpoints scan') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {    
-                    sh """
-                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}${params.endpointsPath} --batch > sqlmap
-                    """  
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') { 
+                    script{
+                        sh """
+                        docker run --rm -v ${PWD}:/sqlmap thanosefsta/sqlmap:latest -m sqlmap${workspace}${params.endpointsPath} --batch
+                        """  
+                    }   
+                    // > sqlmap
+                    
                 }
                 
             }
