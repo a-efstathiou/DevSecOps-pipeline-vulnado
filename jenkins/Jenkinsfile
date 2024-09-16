@@ -132,7 +132,7 @@ pipeline {
                                 snyk/snyk:docker snyk test --docker ${image} --severity-threshold=critical --fail-on=all > snyk_${sanitizedImageName}
                             """
                         }
-                    }
+                    } 
                 }
             }
         }             
