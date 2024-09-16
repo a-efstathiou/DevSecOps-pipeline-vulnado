@@ -144,7 +144,7 @@ pipeline {
                         // docker run --rm -v ${workspace}:/sqlmap thanosefsta/sqlmap:latest -m sqlmap${params.endpointsPath} --batch
                         // """  
                         sh """
-                        docker run -rm -v jenkins_jenkins-data:/var/jenkins_home \
+                        docker run --rm -v jenkins_jenkins-data:/var/jenkins_home \
                         thanosefsta/sqlmap:latest \
                         -m /var/jenkins_home/workspace/${JOB_NAME}${params.endpointsPath} --batch
                         """ 
