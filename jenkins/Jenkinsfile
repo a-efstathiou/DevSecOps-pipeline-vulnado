@@ -11,6 +11,7 @@ pipeline {
         workspace = ''
         relativeWorkspacePath = ''
         SNYK_TOKEN = credentials('snyk-token')
+        IMAGES = ''
     } 
     stages {
         stage ('Checkout SCM') 
@@ -121,6 +122,7 @@ pipeline {
  
                         // Save images to an environment variable for later stages
                         imagesString = images.join(",")
+                        IMAGES = imagesString
                 
                         if (imagesString && imagesString.trim()) {
                             images = imagesString.split(",")
@@ -155,7 +157,7 @@ pipeline {
                         sh """
                         docker run --rm -v jenkins_jenkins-data:/var/jenkins_home \
                         thanosefsta/sqlmap:latest \
-                        -m /var/jenkins_home/workspace/${JOB_NAME}${params.endpointsPath} --batch
+                        -m /var/jenkins_home/workspace/${JOB_NAME}${params.endpointsPath} --batch > sqlmap
                         """ 
                     }    
                     // > sqlmap
@@ -181,7 +183,7 @@ pipeline {
                         docker system prune -af
                         """
 
-                        def images = env.IMAGES.split(",")
+                        def images = IMAGES.split(",")
                         sh """
                         REPORT_DIR="reports/${JOB_NAME}_${BUILD_NUMBER}"
                         mkdir -p ${REPORT_DIR}
