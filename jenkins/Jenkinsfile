@@ -177,7 +177,10 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
-                        sh "docker purge" 
+                        sh """
+                        docker system prune -af
+                        """
+
                         def images = env.IMAGES.split(",")
                         sh """
                         REPORT_DIR="reports/${JOB_NAME}_${BUILD_NUMBER}"
