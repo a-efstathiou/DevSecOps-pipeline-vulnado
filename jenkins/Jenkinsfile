@@ -85,7 +85,7 @@ pipeline {
                             sh """
                                 docker compose -f ${workspace}${params.dockerComposePath} build --parallel
                             """
-                             
+                              
                             // Get repository and tag of the images created by docker-compose
                             images = sh(script: """
                                 docker-compose -f ${workspace}${params.dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
