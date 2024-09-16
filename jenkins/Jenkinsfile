@@ -86,9 +86,18 @@ pipeline {
                                 docker-compose -f ${workspace}${params.dockerComposePath} build --parallel
                             """ 
 
-                            images = sh(script: """
+                            //Due to naming conventions
+                            def imagesWithUnderscore = sh(script: """
+                                docker images --filter "reference=${projectName}_*" --format '{{.Repository}}:{{.Tag}}'
+                            """, returnStdout: true).trim().split("\n")    
+
+                            def imagesWithDashes = sh(script: """
                                 docker images --filter "reference=${projectName}-*" --format '{{.Repository}}:{{.Tag}}'
                             """, returnStdout: true).trim().split("\n")     
+ 
+
+
+                            images = imagesWithUnderscore + imagesWithDashes
 
                             def imagesString = images.join('\n')
 
