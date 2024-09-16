@@ -141,7 +141,7 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') { 
                     script{
                         sh """
-                        docker run --rm -v ${PWD}:/sqlmap thanosefsta/sqlmap:latest -m sqlmap${workspace}${params.endpointsPath} --batch
+                        docker run --rm -v ${workspace}:/sqlmap thanosefsta/sqlmap:latest -m sqlmap${params.endpointsPath} --batch
                         """  
                     }   
                     // > sqlmap
