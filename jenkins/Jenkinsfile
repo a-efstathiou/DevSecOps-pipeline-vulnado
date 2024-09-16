@@ -85,7 +85,7 @@ pipeline {
                             echo "Docker Compose file detected. Building images using docker-compose..."
                             sh """ 
                                 docker-compose -f ${workspace}${params.dockerComposePath} build --parallel
-                            """
+                            """ 
 
                             images = sh(script: """
                                 docker images --filter "reference=${projectName}-*" --format '{{.Repository}}:{{.Tag}}'
