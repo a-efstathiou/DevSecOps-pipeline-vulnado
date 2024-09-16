@@ -87,7 +87,7 @@ pipeline {
                                 docker-compose -f ${workspace}${params.dockerComposePath} build --parallel
                             """
 
-                            def images = sh(script: """
+                            images = sh(script: """
                                 docker images --filter "reference=${projectName}-*" --format '{{.Repository}}:{{.Tag}}'
                             """, returnStdout: true).trim().split("\\n")                  
  
