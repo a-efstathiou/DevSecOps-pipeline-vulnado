@@ -78,7 +78,7 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
                     script {
                         def images = []
-
+ 
                         if (dockerComposePath?.trim()) {
                             // If dockerComposePath is provided, run docker-compose to build images
                             echo "Docker Compose file detected. Building images using docker-compose..."
