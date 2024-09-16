@@ -11,7 +11,6 @@ pipeline {
         workspace = ''
         relativeWorkspacePath = ''
         SNYK_TOKEN = credentials('snyk-token')
-        images_string = ''
     } 
     stages {
         stage ('Checkout SCM') 
@@ -73,28 +72,42 @@ pipeline {
                 
             }
         }              
-        stage('Check and build Docker Images') {
+        stage('Snyk Docker Image Scan') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
                     script {
                         def images = []
-
+                        def projectName = "${JOB_NAME}"
+ 
                         if (dockerComposePath?.trim()) {
                             // If dockerComposePath is provided, run docker-compose to build images
                             echo "Docker Compose file detected. Building images using docker-compose..."
-                            sh """
-                                docker compose -f ${workspace}${params.dockerComposePath} build --parallel
-                            """
-                             
-                            // Get repository and tag of the images created by docker-compose
-                            images = sh(script: """
-                                docker compose -f ${workspace}${params.dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
-                            """, returnStdout: true).trim().split("\n")                       
+                            sh """ 
+                                docker-compose -f ${workspace}${params.dockerComposePath} build --parallel
+                            """ 
+ 
+                            //Due to naming conventions
+                            def imagesWithUnderscore = sh(script: """
+                                docker images --filter "reference=${projectName}_*" --format '{{.Repository}}:{{.Tag}}'
+                            """, returnStdout: true).trim().split("\n")    
 
+                            def imagesWithDashes = sh(script: """
+                                docker images --filter "reference=${projectName}-*" --format '{{.Repository}}:{{.Tag}}'
+                            """, returnStdout: true).trim().split("\n")     
+ 
+
+
+                            images = imagesWithUnderscore + imagesWithDashes
+
+                            def imagesString = images.join('\n')
+
+                            // Echo the joined string
+                            echo "Found images:\n${imagesString}"          
+ 
                         } else if (dockerfilePath?.trim()) {
                             // If dockerComposePath is NOT provided, build the Docker image using the Dockerfile
                             echo "Dockerfile detected. Building image using docker build..."
-                            
+                             
                             def imageName = "my_image:latest" // You can customize the image name as needed
                             sh """
                                 docker build -t ${imageName} -f ${params.dockerfilePath} .
@@ -105,47 +118,48 @@ pipeline {
                         } else {
                             error "No Dockerfile or Docker Compose file provided. Please provide at least one."
                         }
-
+ 
                         // Save images to an environment variable for later stages
-                        images_string = images.join(",")
-                    }
-                }
-            }
-        }
-        stage('Snyk Docker Image vulnerability scan') {
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    script {
-                        def images = []
-                        if (${images_string} && ${images_string}.trim()) {
-                            images = ${images_string}.split(",")
+                        imagesString = images.join(",")
+                
+                        if (imagesString && imagesString.trim()) {
+                            images = imagesString.split(",")
                         }
                         else {
                             error "No images to scan with Snyk"
                         }
-
+    
                         for (image in images) {
                             def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
 
                             echo "Scanning image: ${image} using Snyk..."
 
                             sh "rm -f snyk_${sanitizedImageName}"
-
+   
                             sh """
-                                docker run --rm -it --env ${SNYK_TOKEN} -v /var/run/docker.sock:/var/run/docker.sock \
-                                snyk/snyk:docker snyk test --docker ${image} --severity-threshold=critical --fail-on=all > snyk_${sanitizedImageName}
-                            """
+                            docker run --rm --env SNYK_TOKEN=${env.SNYK_TOKEN} -v /var/run/docker.sock:/var/run/docker.sock \
+                            snyk/snyk:docker snyk test --docker ${image} --severity-threshold=critical --json --fail-on=all >  snyk_${sanitizedImageName}
+                            """       
                         }
-                    }
+                    }  
                 }
             }
         }             
         stage('SQL map endpoints scan') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {    
-                    sh """
-                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}${params.endpointsPath} --batch > sqlmap
-                    """  
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') { 
+                    script{
+                        // sh """
+                        // docker run --rm -v ${workspace}:/sqlmap thanosefsta/sqlmap:latest -m sqlmap${params.endpointsPath} --batch
+                        // """  
+                        sh """
+                        docker run --rm -v jenkins_jenkins-data:/var/jenkins_home \
+                        thanosefsta/sqlmap:latest \
+                        -m /var/jenkins_home/workspace/${JOB_NAME}${params.endpointsPath} --batch
+                        """ 
+                    }    
+                    // > sqlmap
+                     
                 }
                 
             }
