@@ -77,7 +77,7 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
                     script {
                         def images = []
-                        def projectName = sh(script: "basename ${JOB_NAME}", returnStdout: true).trim()
+                        def projectName = "${JOB_NAME}"
  
                         if (dockerComposePath?.trim()) {
                             // If dockerComposePath is provided, run docker-compose to build images
