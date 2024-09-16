@@ -119,7 +119,7 @@ pipeline {
                         else {
                             error "No images to scan with Snyk"
                         }
- 
+  
                         for (image in images) {
                             def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
 
