@@ -128,7 +128,7 @@ pipeline {
                         else {
                             error "No images to scan with Snyk"
                         }
-   
+    
                         for (image in images) {
                             def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
 
@@ -137,8 +137,8 @@ pipeline {
                             sh "rm -f snyk_${sanitizedImageName}"
  
                             sh """
-                            docker run --rm --env ${env.SNYK_TOKEN} -v /var/run/docker.sock:/var/run/docker.sock \
-                            snyk/snyk:docker snyk test --docker ${image} --severity-threshold=critical --fail-on=all 
+                            docker run --rm --e SNYK_TOKEN=${env.SNYK_TOKEN} -v /var/run/docker.sock:/var/run/docker.sock \
+                            snyk/snyk:docker snyk test --docker ${image} --severity-threshold=critical --json --fail-on=all 
                             """
 
                             //> snyk_${sanitizedImageName}
