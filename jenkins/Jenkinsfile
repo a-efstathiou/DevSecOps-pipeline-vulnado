@@ -11,7 +11,6 @@ pipeline {
         workspace = ''
         relativeWorkspacePath = ''
         SNYK_TOKEN = credentials('snyk-token')
-        images_string = ''
     } 
     stages {
         stage ('Checkout SCM') 
@@ -89,7 +88,12 @@ pipeline {
 
                             images = sh(script: """
                                 docker images --filter "reference=${projectName}-*" --format '{{.Repository}}:{{.Tag}}'
-                            """, returnStdout: true).trim().split("\\n")                  
+                            """, returnStdout: true).trim().split("\n")     
+
+                            def imagesString = images.join('\n')
+
+                            // Echo the joined string
+                            echo "Found images:\n${imagesString}"          
  
                         } else if (dockerfilePath?.trim()) {
                             // If dockerComposePath is NOT provided, build the Docker image using the Dockerfile
@@ -107,12 +111,10 @@ pipeline {
                         }
 
                         // Save images to an environment variable for later stages
-                        images_string = images.join(",")
-                    }
-                    script {
-                        def images = []
-                        if (${images_string} && ${images_string}.trim()) {
-                            images = ${images_string}.split(",")
+                        imagesString = images.join(",")
+                
+                        if (imagesString && imagesString.trim()) {
+                            images = imagesString.split(",")
                         }
                         else {
                             error "No images to scan with Snyk"
