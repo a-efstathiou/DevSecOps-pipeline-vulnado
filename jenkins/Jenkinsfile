@@ -83,7 +83,7 @@ pipeline {
                             // If dockerComposePath is provided, run docker-compose to build images
                             echo "Docker Compose file detected. Building images using docker-compose..."
                             sh """
-                                docker compose -f ${workspace}${params.dockerComposePath} build --parallel
+                                docker-compose -f ${workspace}${params.dockerComposePath} build --parallel
                             """
                             //docker-compose -f ${workspace}${params.dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
                             // Get repository and tag of the images created by docker-compose
@@ -109,8 +109,6 @@ pipeline {
                         // Save images to an environment variable for later stages
                         images_string = images.join(",")
                     }
-                }
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
                         def images = []
                         if (${images_string} && ${images_string}.trim()) {
