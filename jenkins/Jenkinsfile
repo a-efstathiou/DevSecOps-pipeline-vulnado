@@ -109,7 +109,7 @@ pipeline {
                         } else {
                             error "No Dockerfile or Docker Compose file provided. Please provide at least one."
                         }
-
+ 
                         // Save images to an environment variable for later stages
                         imagesString = images.join(",")
                 
