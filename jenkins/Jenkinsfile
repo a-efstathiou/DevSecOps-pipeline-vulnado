@@ -85,7 +85,7 @@ pipeline {
                             sh """ 
                                 docker-compose -f ${workspace}${params.dockerComposePath} build --parallel
                             """ 
-
+ 
                             //Due to naming conventions
                             def imagesWithUnderscore = sh(script: """
                                 docker images --filter "reference=${projectName}_*" --format '{{.Repository}}:{{.Tag}}'
