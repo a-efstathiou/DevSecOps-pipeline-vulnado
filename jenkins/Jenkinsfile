@@ -164,34 +164,20 @@ pipeline {
                 
             }
         }
-        stage('Run Nmap - Opened Gates') {
+        stage('Run Nmap-Vuln Scan-Opened Ports-Vulnerabilites') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    script {
-                        sh """
-                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -p- 192.168.2.11
-                        """
-                    }
+                script {
+                    sh """
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -sV --script vuln 192.168.2.11 -p 80,223,8080,8082
+                    """
                 }
-                
             }
         }
-        stage('Run Nmap - Vuln Scan') {
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    script {
-                        sh """
-                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -sV --script vuln 192.168.2.11
-                        """
-                    }
-                }
-                
-            }
-        }   
         stage('Clean up') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
+                        sh "docker purge" 
                         def images = env.IMAGES.split(",")
                         sh """
                         REPORT_DIR="reports/${JOB_NAME}_${BUILD_NUMBER}"
