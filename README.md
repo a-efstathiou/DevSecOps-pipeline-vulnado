@@ -1,3 +1,8 @@
+# DevSecOps pipeline using Vulnado repository for testing
+
+This is a DevSecOps pipeline that runs several dynamic and static tests on the commited code. It can be used with a git hook calling the url of the pipeline that you can define in the settings.
+All the relevant files of the pipeline are in the **/Jenkins** folder. Below is the original markup file of the forked repository
+
 # Vulnado - Intentionally Vulnerable Java Application
 
 This application and exercises will take you through some of the OWASP top 10 Vulnerabilities and how to prevent them.
